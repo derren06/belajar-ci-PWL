@@ -87,10 +87,27 @@
                     <td>Subtotal</td>
                     <td><?= number_to_currency($total, 'IDR') ?></td>
                 </tr>
+
                 <tr>
                     <td colspan="2"></td>
-                    <td>Total</td>
-                    <td><span id="total"><?= number_to_currency($total, 'IDR') ?></span></td>
+                    <td>Diskon</td>
+                    <td>
+                        <span id="diskon">
+                            <?= number_to_currency($diskon, 'IDR') ?>
+                        </span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2"></td>
+                    <td><strong>Grand Total</strong></td>
+                    <td>
+                        <strong>
+                            <span id="total">
+                                <?= number_to_currency($total, 'IDR') ?>
+                            </span>
+                        </strong>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -102,6 +119,7 @@
     $(document).ready(function() {
         let ongkir = 0;
         let subtotal = <?= $total ?>;
+        let diskon = <?= $diskon ?>;
         hitungTotal();
 
         function hitungTotal() {
