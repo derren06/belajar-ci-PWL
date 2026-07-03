@@ -18,7 +18,7 @@ class TransaksiController extends BaseController
     public function __construct()
     {
         helper('diskon');
-        helper(['number', 'form']);
+        helper(['number', 'form', 'transaksi']);
 
         $this->cart = service('cart');
         $this->transactionModel = new TransactionModel();
@@ -102,21 +102,27 @@ class TransaksiController extends BaseController
 
     public function checkout()
     {
-        $totalUnit = 0;
+        $subtotal = $this->cart->total();
 
-        foreach ($this->cart->contents() as $item) {
-            $totalUnit += $item['qty'];
-        }
+        // Hitung PPN
+        $ppn = hitung_ppn($subtotal);
 
-        $diskon = hitung_diskon(
-            $totalUnit,
-            $this->cart->total()
-        );
+        // Hitung biaya admin
+        $biaya_admin = hitung_biaya_admin($subtotal);
+
+        // Belum ada kupon saat halaman pertama dibuka
+        $diskon_kupon = 0;
+
+        // Grand Total (ongkir nanti ditambah lewat JavaScript)
+        $total = $subtotal + $ppn + $biaya_admin - $diskon_kupon;
 
         $data = [
-            'items'  => $this->cart->contents(),
-            'total'  => $this->cart->total() - $diskon,
-            'diskon' => $diskon
+            'items'           => $this->cart->contents(),
+            'subtotal'        => $subtotal,
+            'ppn'             => $ppn,
+            'biaya_admin'     => $biaya_admin,
+            'diskon_kupon'    => $diskon_kupon,
+            'total'           => $total
         ];
 
         return view('v_checkout', $data);
@@ -188,27 +194,40 @@ class TransaksiController extends BaseController
         $db = \Config\Database::connect();
         $db->transStart();
 
+
         $subtotal = 0;
-        $totalUnit = 0;
 
         foreach ($cartItems as $item) {
             $subtotal += $item['qty'] * $item['price'];
-            $totalUnit += $item['qty'];
         }
 
-        $diskon = hitung_diskon($totalUnit, $subtotal);
+        $ppn = hitung_ppn($subtotal);
+        $biaya_admin = hitung_biaya_admin($subtotal);
+
+        $kupon = $this->request->getPost('kupon_code');
+        $diskon_kupon = hitung_diskon_kupon($kupon, $subtotal);
+
+        $ongkir = (int)$this->request->getPost('ongkir');
+
+        $total = $subtotal
+            + $ppn
+            + $biaya_admin
+            + $ongkir
+            - $diskon_kupon;
 
         $ongkir = (int) $this->request->getPost('ongkir');
 
         $transaction = [
-            'username'    => $this->request->getPost('username'),
-            'alamat'      => $this->request->getPost('alamat'),
-            'ongkir'      => $ongkir,
-            'diskon'      => $diskon,
-            'total_harga' => ($subtotal - $diskon) + $ongkir,
-            'status'      => 0,
+            'username'      => $this->request->getPost('username'),
+            'alamat'        => $this->request->getPost('alamat'),
+            'ongkir'        => $ongkir,
+            'ppn'           => $ppn,
+            'biaya_admin'   => $biaya_admin,
+            'kupon_code'    => $kupon,
+            'diskon_kupon'  => $diskon_kupon,
+            'total_harga'   => $total,
+            'status'        => 0,
         ];
-
         // insert transaction
         if (!$this->transactionModel->insert($transaction)) {
             $db->transRollback();
@@ -223,7 +242,7 @@ class TransaksiController extends BaseController
                 'transaction_id' => $transactionId,
                 'product_id'     => $item['id'],
                 'jumlah'         => $item['qty'],
-                'diskon' => $diskon,
+                'diskon' => 0,
                 'subtotal_harga' => $item['qty'] * $item['price']
             ]);
         }
