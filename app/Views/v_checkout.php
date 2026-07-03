@@ -1,132 +1,270 @@
 <?= $this->extend('layout') ?>
 <?= $this->section('content') ?>
 <div class="row">
-    <div class="col-lg-6">
-        <?= form_open('buy', 'class="row g-3"') ?>
 
-        <?= form_hidden('username', session()->get('username')) ?>
+    <!-- FORM -->
+    <div class="col-lg-5">
 
-        <?= form_input([
-            'type' => 'hidden',
-            'name' => 'total_harga',
-            'id' => 'total_harga'
-        ]) ?>
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5>Detail Pesanan</h5>
+            </div>
 
-        <div class="col-12">
-            <?= form_label('Nama', 'nama', ['class' => 'form-label']) ?>
-            <?= form_input([
-                'name'     => 'nama',
-                'id'       => 'nama',
-                'class'    => 'form-control',
-                'value'    => session()->get('username'),
-                'readonly' => true
-            ]) ?>
-        </div>
-        <div class="col-12">
-            <?= form_label('Alamat', 'alamat', ['class' => 'form-label']) ?>
-            <?= form_input([
-                'name'  => 'alamat',
-                'id'    => 'alamat',
-                'class' => 'form-control'
-            ]) ?>
-        </div>
-        <div class="col-12">
-            <?= form_label('Kelurahan', 'kelurahan', ['class' => 'form-label']) ?>
-            <?= form_dropdown('kelurahan', [], '', ['id' => 'kelurahan', 'class' => 'form-control']) ?>
-        </div>
-        <div class="col-12">
-            <?= form_label('Layanan', 'layanan', ['class' => 'form-label']) ?>
-            <?= form_dropdown('layanan', [], '', ['id' => 'layanan', 'class' => 'form-control']) ?>
-        </div>
-        <div class="col-12">
-            <?= form_label('Ongkir', 'ongkir', ['class' => 'form-label']) ?>
-            <?= form_input([
-                'name'     => 'ongkir',
-                'id'       => 'ongkir',
-                'class'    => 'form-control',
-                'readonly' => true
-            ]) ?>
-        </div>
-        <div class="col-12">
-            <?= form_submit(
-                'submit',
-                'Buat Pesanan',
-                ['class' => 'btn btn-primary']
-            ) ?>
+            <div class="card-body">
+
+                <?= form_open('buy') ?>
+
+                <?= form_hidden('username', session()->get('username')) ?>
+
+                <div class="mb-3">
+                    <label>Nama</label>
+                    <input class="form-control"
+                        value="<?= session()->get('username') ?>"
+                        readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label>Alamat</label>
+                    <input
+                        type="text"
+                        name="alamat"
+                        class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label>Kelurahan</label>
+                    <?= form_dropdown('kelurahan', [], '', [
+                        'id' => 'kelurahan',
+                        'class' => 'form-control'
+                    ]) ?>
+                </div>
+
+                <div class="mb-3">
+                    <label>Layanan</label>
+                    <?= form_dropdown('layanan', [], '', [
+                        'id' => 'layanan',
+                        'class' => 'form-control'
+                    ]) ?>
+                </div>
+
+                <div class="mb-3">
+                    <label>Ongkir</label>
+                    <input
+                        readonly
+                        id="ongkir"
+                        name="ongkir"
+                        class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label>Kode Kupon</label>
+
+                    <input
+                        id="kupon_code"
+                        name="kupon_code"
+                        class="form-control"
+                        placeholder="HEMAT10">
+
+                    <small class="text-muted">
+                        Tersedia : HEMAT10, HEMAT20
+                    </small>
+                </div>
+
+                <button class="btn btn-primary w-100">
+                    Buat Pesanan
+                </button>
+
+                <?= form_close() ?>
+
+            </div>
+
         </div>
 
-        <?= form_close() ?>
     </div>
-    <div class="col-lg-6">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">Nama</th>
-                    <th scope="col">Harga</th>
-                    <th scope="col">Jumlah</th>
-                    <th scope="col">Sub Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php
-                if (!empty($items)) :
-                    foreach ($items as $index => $item) :
-                ?>
+
+
+    <!-- RINGKASAN -->
+    <div class="col-lg-7">
+
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+                <h5>Ringkasan Pesanan</h5>
+            </div>
+
+            <div class="card-body">
+
+                <table class="table">
+
+                    <thead>
+
                         <tr>
-                            <td><?= $item['name'] ?></td>
-                            <td><?= number_to_currency($item['price'], 'IDR') ?></td>
-                            <td><?= $item['qty'] ?></td>
-                            <td><?= number_to_currency($item['price'] * $item['qty'], 'IDR') ?></td>
+                            <th>Nama</th>
+                            <th>Harga</th>
+                            <th>Qty</th>
+                            <th>Subtotal</th>
                         </tr>
-                <?php
-                    endforeach;
-                endif;
-                ?>
-                <tr>
-                    <td colspan="2"></td>
-                    <td>Subtotal</td>
-                    <td><?= number_to_currency($total, 'IDR') ?></td>
-                </tr>
 
-                <tr>
-                    <td colspan="2"></td>
-                    <td>Diskon</td>
-                    <td>
-                        <span id="diskon">
-                            <?= number_to_currency($diskon, 'IDR') ?>
-                        </span>
-                    </td>
-                </tr>
+                    </thead>
 
-                <tr>
-                    <td colspan="2"></td>
-                    <td><strong>Grand Total</strong></td>
-                    <td>
-                        <strong>
-                            <span id="total">
-                                <?= number_to_currency($total, 'IDR') ?>
-                            </span>
-                        </strong>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                    <tbody>
+
+                        <?php foreach ($items as $item): ?>
+
+                            <tr>
+
+                                <td><?= $item['name'] ?></td>
+
+                                <td>
+                                    <?= number_to_currency($item['price'], 'IDR') ?>
+                                </td>
+
+                                <td><?= $item['qty'] ?></td>
+
+                                <td>
+                                    <?= number_to_currency($item['price'] * $item['qty'], 'IDR') ?>
+                                </td>
+
+                            </tr>
+
+                        <?php endforeach; ?>
+
+                        <tr>
+                            <td colspan="3" align="right">Subtotal</td>
+                            <td><?= number_to_currency($subtotal, 'IDR') ?></td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="3" align="right" class="text-danger">
+                                Diskon Kupon
+                            </td>
+
+                            <td class="text-danger">
+                                <span id="diskonText">
+                                    <?= number_to_currency($diskon_kupon, 'IDR') ?>
+                                </span>
+                            </td>
+
+                        </tr>
+
+                        <tr>
+                            <td colspan="3" align="right">
+                                PPN (11%)
+                            </td>
+
+                            <td>
+                                <?= number_to_currency($ppn, 'IDR') ?>
+                            </td>
+
+                        </tr>
+
+                        <tr>
+                            <td colspan="3" align="right">
+                                Biaya Admin
+                            </td>
+
+                            <td>
+                                <?= number_to_currency($biaya_admin, 'IDR') ?>
+                            </td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td colspan="3" align="right">
+                                Ongkir
+                            </td>
+
+                            <td>
+                                <span id="ongkirText">
+                                    Rp 0
+                                </span>
+                            </td>
+
+                        </tr>
+
+                        <tr class="table-success">
+
+                            <td colspan="3">
+                                <strong>Grand Total</strong>
+                            </td>
+
+                            <td>
+
+                                <strong id="total">
+                                    <?= number_to_currency($total, 'IDR') ?>
+                                </strong>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
     </div>
+
 </div>
 <?= $this->endSection() ?>
 <?= $this->section('script') ?>
 <script>
     $(document).ready(function() {
+
+        let subtotal = <?= $subtotal ?>;
+        let ppn = <?= $ppn ?>;
+        let biaya_admin = <?= $biaya_admin ?>;
+        let diskon = <?= $diskon_kupon ?>;
+        $("#kupon_code").on("keyup", function() {
+
+            let kode = $(this).val().toUpperCase();
+
+            if (kode == "HEMAT10") {
+                diskon = subtotal * 0.10;
+            } else if (kode == "HEMAT20") {
+                diskon = subtotal * 0.20;
+            } else {
+                diskon = 0;
+            }
+
+            $("#diskonText").text(
+                "Rp " + diskon.toLocaleString('id-ID')
+            );
+
+            hitungTotal();
+
+        });
         let ongkir = 0;
-        let subtotal = <?= $total ?>;
-        let diskon = <?= $diskon ?>;
+
         hitungTotal();
 
         function hitungTotal() {
-            let total = subtotal + ongkir;
+
+            let total =
+                subtotal +
+                ppn +
+                biaya_admin +
+                ongkir -
+                diskon;
 
             $("#ongkir").val(ongkir);
-            $("#total").text(`IDR ${total.toLocaleString('id-ID')}`);
+
+            $("#ongkirText").text(
+                "Rp " + ongkir.toLocaleString('id-ID')
+            );
+
+            $("#diskonText").text(
+                "Rp " + diskon.toLocaleString('id-ID')
+            );
+
+            $("#total").text(
+                "Rp " + total.toLocaleString('id-ID')
+            );
+
             $("#total_harga").val(total);
         }
         $('#kelurahan').select2({
