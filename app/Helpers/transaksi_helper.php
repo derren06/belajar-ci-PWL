@@ -23,13 +23,16 @@ if (!function_exists('hitung_biaya_admin')) {
 if (!function_exists('hitung_diskon_kupon')) {
     function hitung_diskon_kupon($kode, $subtotal)
     {
-        switch (strtoupper($kode)) {
-
-            case 'HEMAT10':
-                return $subtotal * 0.10;
+        switch (strtoupper(trim($kode))) {
 
             case 'HEMAT20':
                 return $subtotal * 0.20;
+
+            case 'HEMAT30':
+                return $subtotal * 0.30;
+
+            case 'MEMBER25':
+                return $subtotal * 0.25;
 
             default:
                 return 0;
