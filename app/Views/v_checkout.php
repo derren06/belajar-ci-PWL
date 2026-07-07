@@ -63,10 +63,10 @@
                         id="kupon_code"
                         name="kupon_code"
                         class="form-control"
-                        placeholder="HEMAT10">
+                        placeholder="HEMAT20">
 
                     <small class="text-muted">
-                        Tersedia : HEMAT10, HEMAT20
+                        Tersedia : HEMAT20, HEMAT30, MEMBER25
                     </small>
                 </div>
 
@@ -221,12 +221,14 @@
         let diskon = <?= $diskon_kupon ?>;
         $("#kupon_code").on("keyup", function() {
 
-            let kode = $(this).val().toUpperCase();
+            let kode = $(this).val().trim().toUpperCase();
 
-            if (kode == "HEMAT10") {
-                diskon = subtotal * 0.10;
-            } else if (kode == "HEMAT20") {
+            if (kode == "HEMAT20") {
                 diskon = subtotal * 0.20;
+            } else if (kode == "HEMAT30") {
+                diskon = subtotal * 0.30;
+            } else if (kode == "MEMBER25") {
+                diskon = subtotal * 0.25;
             } else {
                 diskon = 0;
             }
