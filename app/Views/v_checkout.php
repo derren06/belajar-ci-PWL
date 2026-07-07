@@ -149,7 +149,7 @@
 
                         <tr>
                             <td colspan="3" align="right">
-                                PPN (11%)
+                                PPN (12%)
                             </td>
 
                             <td>
